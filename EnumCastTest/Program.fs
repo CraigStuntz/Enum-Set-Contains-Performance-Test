@@ -37,8 +37,19 @@ let private testSet = [|
     |]
 
 let private rand = System.Random()
-let private testInput : SomeEnum[] = Array.init(1000000) (fun i -> LanguagePrimitives.EnumOfValue (i % 20))
+let private testInput : SomeEnum[] = Array.init(1000) (fun i -> LanguagePrimitives.EnumOfValue (rand.Next 20))
 let private intTestInput = testInput |> Array.map(fun e -> (int) e)
+
+let timeit name mult (action : unit -> unit) =
+    action ()
+    printfn "Testing %s" name
+    let sw = new System.Diagnostics.Stopwatch()
+    sw.Start ()
+    let tc = 1000*mult
+    for x in 0..tc do
+        action ()
+    sw.Stop ()
+    (float sw.ElapsedMilliseconds) / (float mult)
 
 [<EntryPoint>]
 let main _ = 
@@ -49,47 +60,22 @@ let main _ =
     let fSharp            = EnumDenseIntSet<SomeEnum>(testSet)
     let fSharpConvertible = ConvertibleDenseIntSet<SomeEnum>(testSet)
     let fSharpUgly        = UglyDenseIntSet<SomeEnum>(testSet)
-    printfn "Testing HashSet..."
-    sw.Start()
-    let hashSetOutput = testInput |> Array.filter (fun input -> hashSet.Contains input)
-    sw.Stop()
-    let hashSetTime = sw.Elapsed.Milliseconds
-    sw.Reset()
-    printfn "Testing Set..."
-    sw.Start()
-    let fSharpSetOutput = testInput |> Array.filter (fun input -> Set.contains input fSharpSet)
-    sw.Stop()
-    let fSharpSetTime = sw.Elapsed.Milliseconds
-    sw.Reset()
-    printfn "Testing C#..."
-    sw.Start()
-    let cSharpOutput = testInput |> Array.filter (fun input -> cSharp.Contains input)
-    sw.Stop()
-    let cSharpTime = sw.Elapsed.Milliseconds
-    sw.Reset()
-    printfn "Testing F#..."
-    sw.Start()
-    let fSharpOutput = testInput |> Array.filter (fun input -> fSharp.Contains input)
-    sw.Stop()
-    let fSharpTime = sw.Elapsed.Milliseconds
-    sw.Reset()
-    printfn "Testing F# (IConvertible)..."
-    sw.Start()
-    let fSharpConvertibleOutput = testInput |> Array.filter (fun input -> fSharpConvertible.Contains input)
-    sw.Stop()
-    let fSharpConvertibleTime = sw.Elapsed.Milliseconds
-    sw.Reset()
-    printfn "Testing F# (int input)..."
-    sw.Start()
-    let fSharpUglyOutput = intTestInput |> Array.filter (fun input -> fSharpUgly.Contains input)
-    sw.Stop()
-    let fSharpUglyTime = sw.Elapsed.Milliseconds
-    printfn "F# set:            %d ms" fSharpSetTime
-    printfn "HashSet:           %d ms" hashSetTime
-    printfn "C#:                %d ms" cSharpTime
-    printfn "F# (generic enum): %d ms" fSharpTime
-    printfn "F# (IConvertible): %d ms" fSharpConvertibleTime
-    printfn "F# (int input):    %d ms" fSharpUglyTime
+    
+    let hashSetTime             = timeit "HashSet:          "   10  <| fun () -> for x in testInput do ignore   <| hashSet.Contains x
+    let fSharpSetTime           = timeit "F# set:           "   1   <| fun () -> for x in testInput do ignore   <| fSharpSet.Contains x
+    let cSharpTime              = timeit "C#:               "   10  <| fun () -> for x in testInput do ignore   <| cSharp.Contains x
+    let cSharpTime2             = timeit "C#2:              "   100 <| fun () -> for x in intTestInput do ignore<| cSharp.Contains2 x
+    let fSharpTime              = timeit "F# (generic enum):"   10  <| fun () -> for x in testInput do ignore   <| fSharp.Contains x
+    let fSharpConvertibleTime   = timeit "F# (IConvertible):"   10  <| fun () -> for x in testInput do ignore   <| fSharpConvertible.Contains x
+    let fSharpUglyTime          = timeit "F# (int input):   "   100 <| fun () -> for x in intTestInput do ignore<| fSharpUgly.Contains x
+
+    printfn "HashSet:           %f ms" hashSetTime
+    printfn "F# set:            %f ms" fSharpSetTime
+    printfn "C#:                %f ms" cSharpTime
+    printfn "C#2:               %f ms" cSharpTime2
+    printfn "F# (generic enum): %f ms" fSharpTime
+    printfn "F# (IConvertible): %f ms" fSharpConvertibleTime
+    printfn "F# (int input):    %f ms" fSharpUglyTime
     printfn ""
     printfn "Press Enter to exit."
     System.Console.ReadLine() |> ignore
