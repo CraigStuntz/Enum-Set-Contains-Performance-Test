@@ -35,5 +35,10 @@ namespace CSharpEnumCast
 		    var index = value.ToInt32(CultureInfo.InvariantCulture);
 		    return _items[index];
 	    }
+
+	    public bool Contains2(int value)
+	    {
+		    return _items[value];
+	    }
     }
 }
