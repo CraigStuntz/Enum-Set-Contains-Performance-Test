@@ -53,7 +53,6 @@ let timeit name mult (action : unit -> unit) =
 
 [<EntryPoint>]
 let main _ = 
-    let sw = new System.Diagnostics.Stopwatch()
     let hashSet           = HashSet testSet
     let fSharpSet         = set testSet
     let cSharp            = CSharpEnumCast.CSharpDenseIntSet<SomeEnum>(testSet)
@@ -61,21 +60,21 @@ let main _ =
     let fSharpConvertible = ConvertibleDenseIntSet<SomeEnum>(testSet)
     let fSharpUgly        = UglyDenseIntSet<SomeEnum>(testSet)
     
-    let hashSetTime             = timeit "HashSet:          "   10  <| fun () -> for x in testInput do ignore   <| hashSet.Contains x
-    let fSharpSetTime           = timeit "F# set:           "   1   <| fun () -> for x in testInput do ignore   <| fSharpSet.Contains x
-    let cSharpTime              = timeit "C#:               "   10  <| fun () -> for x in testInput do ignore   <| cSharp.Contains x
-    let cSharpTime2             = timeit "C#2:              "   100 <| fun () -> for x in intTestInput do ignore<| cSharp.Contains2 x
-    let fSharpTime              = timeit "F# (generic enum):"   10  <| fun () -> for x in testInput do ignore   <| fSharp.Contains x
-    let fSharpConvertibleTime   = timeit "F# (IConvertible):"   10  <| fun () -> for x in testInput do ignore   <| fSharpConvertible.Contains x
-    let fSharpUglyTime          = timeit "F# (int input):   "   100 <| fun () -> for x in intTestInput do ignore<| fSharpUgly.Contains x
+    let hashSetTime             = timeit "HashSet           "   10  <| fun () -> for x in testInput do ignore   <| hashSet.Contains x
+    let fSharpSetTime           = timeit "F# set            "   1   <| fun () -> for x in testInput do ignore   <| fSharpSet.Contains x
+    let cSharpTime              = timeit "C#                "   10  <| fun () -> for x in testInput do ignore   <| cSharp.Contains x
+    let cSharpTime2             = timeit "C# (int input)    "   100 <| fun () -> for x in intTestInput do ignore<| cSharp.Contains2 x
+    let fSharpTime              = timeit "F# (generic enum) "   10  <| fun () -> for x in testInput do ignore   <| fSharp.Contains x
+    let fSharpConvertibleTime   = timeit "F# (IConvertible) "   10  <| fun () -> for x in testInput do ignore   <| fSharpConvertible.Contains x
+    let fSharpUglyTime          = timeit "F# (int input)    "   100 <| fun () -> for x in intTestInput do ignore<| fSharpUgly.Contains x
 
-    printfn "HashSet:           %f ms" hashSetTime
-    printfn "F# set:            %f ms" fSharpSetTime
-    printfn "C#:                %f ms" cSharpTime
-    printfn "C#2:               %f ms" cSharpTime2
-    printfn "F# (generic enum): %f ms" fSharpTime
-    printfn "F# (IConvertible): %f ms" fSharpConvertibleTime
-    printfn "F# (int input):    %f ms" fSharpUglyTime
+    printfn "HashSet:           %g ms" hashSetTime
+    printfn "F# set:            %g ms" fSharpSetTime
+    printfn "C#:                %g ms" cSharpTime
+    printfn "C# (int input):    %g ms" cSharpTime2
+    printfn "F# (generic enum): %g ms" fSharpTime
+    printfn "F# (IConvertible): %g ms" fSharpConvertibleTime
+    printfn "F# (int input):    %g ms" fSharpUglyTime
     printfn ""
     printfn "Press Enter to exit."
     System.Console.ReadLine() |> ignore
